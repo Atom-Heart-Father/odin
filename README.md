@@ -31,7 +31,7 @@
    ```sh
    pip install virtualenv
    ```
-3. Create a virtual environment
+3. Create a virtual env
    ```sh
    python -m venv env
    ```
