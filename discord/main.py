@@ -40,27 +40,25 @@ class MyClient(discord.Client):
     regions_string = "\n1. USA\n2. UK\n3. IN"
     current_prompt = -1
 
+    async def find(self, queries, string):
+        for q in queries:
+            if q in string:
+                return True
+
     async def on_ready(self):
         print(f"Logged on as {self.user}!")
 
     async def handle_provider(self, message):
         success = False
-        if ("google" in message.content.lower() or
-            "gcp" in message.content.lower() or
-            "3" in message.content.lower()):
+        if (await self.find(["google", "gcp", "3"], message.content.lower())):
                 params["provider"] = "Google Cloud Platform"
                 success = True
 
-        if ("amazon" in message.content.lower() or
-        "aws" in message.content.lower() or
-        "2" in message.content.lower()):
+        if (await self.find(["amazon", "web", "services", "aws", "2"], message.content.lower())):
             params["provider"] = "AWS"
             success = True
 
-        if ("digitalocean" in message.content.lower() or
-        "digital" in message.content.lower() or
-        "1" in message.content.lower() or
-        "ocean" in message.content.lower()):
+        if (await self.find(["digital", "ocean", "1"], message.content.lower())):
             params["provider"] = "DigitalOcean"
             success = True
 
@@ -86,7 +84,7 @@ class MyClient(discord.Client):
             return
 
         if self.current_prompt == 0:
-            if not self.handle_provider(message):
+            if not await self.handle_provider(message):
                 await message.channel.send("Sorry couldn't understand that, please try again")
             return
 
