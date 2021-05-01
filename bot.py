@@ -2,10 +2,11 @@ from logging import error
 from dotenv import dotenv_values
 from main import father
 
-config = dotenv_values(".env")
 
 import json
 import discord
+
+config = dotenv_values(".env")
 
 # SECRET_KEY = os.getenv("TOKEN")
 SECRET_KEY = config["TOKEN"]
@@ -13,37 +14,45 @@ SECRET_KEY = config["TOKEN"]
 params = None
 countries = None
 
-with open("./../../params.json", "r") as read_file:
+# with open("./../../params.json", "r") as read_file:
+with open("params.json", "r") as read_file:
     params = json.load(read_file)
+
 
 async def make_child():
     details = {
         "os": params["OS"],
         "name": params["name"],
         "region": params["region"],
+        "provider": params["provider"]
     }
-
-    if params["Package"] == 1:
-        details["memory"] = "1"
-        details["processor"] = "1"
-    elif params["Package"] == 2:
-        details["memory"] = "2"
-        details["processor"] = "1"
-    elif params["Package"] == 3:
-        details["memory"] = "2"
-        details["processor"] = "2"
-    elif params["Package"] == 4:
-        details["memory"] = "4"
-        details["processor"] = "2"
-    elif params["Package"] == 5:
-        details["memory"] = "8"
-        details["processor"] = "4"
+    if params["provider"] == "DigitalOcean":
+        if params["Package"] == 1:
+            details["memory"] = "1"
+            details["processor"] = "1"
+        elif params["Package"] == 2:
+            details["memory"] = "2"
+            details["processor"] = "1"
+        elif params["Package"] == 3:
+            details["memory"] = "2"
+            details["processor"] = "2"
+        elif params["Package"] == 4:
+            details["memory"] = "4"
+            details["processor"] = "2"
+        elif params["Package"] == 5:
+            details["memory"] = "8"
+            details["processor"] = "4"
+    elif params["provider"] == "AWS":
+        if params["Package"] == 1:
+            details["memory"] = "1"
+            details["processor"] = "1"
 
     if await father(details):
         return True
     else:
         return False
     print(details)
+
 
 class MyClient(discord.Client):
 
@@ -62,13 +71,18 @@ Follow the instructions prompted by the bot to finish the set-up.```"""
 
     OS_string = "\n1. Fedora\n2. Ubuntu 16"
 
-    packages_list = [
-        "1. 1 CPU, 1 GB RAM, 25 GB SSD",
-        "2. 1 CPU, 2GB RAM, 50GB SSD",
-        "3. 2 CPU, 2GB RAM, 60GB SSD",
-        "4. 2 CPU, 4GB RAM, 80GB SSD",
-        "5. 4 CPU, 8GB RAM, 160GB SSD"
-    ]
+    packages_list = {
+        "DigitalOcean": [
+            "1. 1 CPU, 1 GB RAM, 25 GB SSD",
+            "2. 1 CPU, 2GB RAM, 50GB SSD",
+            "3. 2 CPU, 2GB RAM, 60GB SSD",
+            "4. 2 CPU, 4GB RAM, 80GB SSD",
+            "5. 4 CPU, 8GB RAM, 160GB SSD"
+        ],
+        "AWS": [
+            "1. 1 CPU, 1 GB RAM [nano]",
+        ]
+    }
 
     async def find(self, queries, string):
         for q in queries:
@@ -85,8 +99,8 @@ Follow the instructions prompted by the bot to finish the set-up.```"""
     async def handle_provider(self, message):
         success = False
         if (await self.find(["google", "gcp", "3"], message.content.lower())):
-                params["provider"] = "Google Cloud Platform"
-                success = True
+            params["provider"] = "Google Cloud Platform"
+            success = True
 
         elif (await self.find(["amazon", "web", "services", "aws", "2"], message.content.lower())):
             params["provider"] = "AWS"
@@ -107,15 +121,25 @@ Follow the instructions prompted by the bot to finish the set-up.```"""
     async def handle_region(self, message):
         success = False
         if (await self.find(["us", "states", "unitedstates", "united states", "america", "1"], message.content.lower())):
-            params["region"] = "nyc3"
+            if (params["provider"] == "DigitalOcean"):
+                params["region"] = "nyc3"
+            elif (params["provider"] == "AWS"):
+                params["region"] = "us-west-2"
             success = True
 
         elif (await self.find(["uk", "kingdom", "unitedkingdom", "united kingdom", "england", "britian", "2"], message.content.lower())):
-            params["region"] = "lon1"
+            if (params["provider"] == "DigitalOcean"):
+                params["region"] = "eu-west-2"
+            elif (params["provider"] == "AWS"):
+                params["region"] = "us-west-2"
             success = True
 
         elif (await self.find(["india", "in", "bharat", "3"], message.content.lower())):
-            params["region"] = "blr1"
+            if (params["provider"] == "DigitalOcean"):
+                params["region"] = "blr1"
+            elif (params["provider"] == "AWS"):
+                params["region"] = "ap-south-1"
+
             success = True
 
         if success:
@@ -127,8 +151,8 @@ Follow the instructions prompted by the bot to finish the set-up.```"""
     async def handle_os(self, message):
         success = False
         if (await self.find(["ubuntu", "2"], message.content.lower())):
-                params["OS"] = "ubuntu-16-04-x64"
-                success = True
+            params["OS"] = "ubuntu-16-04-x64"
+            success = True
 
         elif (await self.find(["fedora", "1"], message.content.lower())):
             params["OS"] = "fedora-34-x64"
@@ -137,19 +161,23 @@ Follow the instructions prompted by the bot to finish the set-up.```"""
         if success:
             await message.channel.send(f"You have selected {params['OS']} as your operating system")
             self.current_prompt = 3
-            await message.channel.send("What package would you like to use?\n" + "\n".join(self.packages_list))
+            await message.channel.send("What package would you like to use?\n" + "\n".join(self.packages_list[params['provider']]))
             return True
 
         return False
-
 
     async def handle_package(self, message):
         success = False
 
         try:
             number = int(message.content.lower()[1:])
-            if 0 < number <= 5:
+            if params["provider"] == "DigitalOcean" and 0 < number <= 5:
                 success = True
+            elif params["provider"] == "AWS" and number == 1:
+                success = True
+            elif params["provider"] == "AWS" and number != 1:
+                await message.channel.send("We only support the micro package cause its free and we don't wanna rack up bills")
+                return 69
             else:
                 await message.channel.send("Invalid package selected")
                 return 69
@@ -158,7 +186,10 @@ Follow the instructions prompted by the bot to finish the set-up.```"""
             return 70
         if success:
             params["Package"] = number
-            await message.channel.send(f"You have selected package {self.packages_list[number-1]}, seems like you have a lot of money")
+            if(params["provider"] == 'AWS'):
+                await message.channel.send(f"You have selected package {self.packages_list['AWS'][number-1]}, seems like you have a lot of money")
+            else:
+                await message.channel.send(f"You have selected package {self.packages_list['DigitalOcean'][number-1]}, seems like you have a lot of money")
             self.current_prompt = 4
             await message.channel.send(f"Looks like things are done! Have a cup of coffee, your VM, {params['name']},  will be ready in about a minute!")
             self.mode = 0
@@ -233,6 +264,7 @@ Please select one of the following providers:\n1. DigitalOcean\n2. AWS\n3. Googl
 
             await message.channel.send(first_message)
             self.current_prompt = 0
+
 
 client = MyClient()
 client.run(SECRET_KEY)

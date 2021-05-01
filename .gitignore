@@ -135,3 +135,4 @@ nlp/data/intents
 lock.json
 terraform.tfstate
 terraform.tfstate.backup
+terraform-provider-aws_v3.38.0_x5
