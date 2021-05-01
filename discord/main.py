@@ -10,6 +10,16 @@ params = {
     'region': ''
 }
 
+def handle_dig_ocean():
+    params['provider'] ="DigitalOcean"
+
+def handle_provider(provider):
+    valid = ["digitalocean", "google cloud", "amazon web services"]
+    if (not provider.lower() in valid):
+        return False
+    if provider == 'DigitalOcean':
+        return handle_dig_ocean()
+
 class MyClient(discord.Client):
     async def on_ready(self):
         print('Logged on as {0}!'.format(self.user))
@@ -30,17 +40,10 @@ class MyClient(discord.Client):
             await message.channel.send(f"Your token is {params['token']}")
 
         if (command == "provider" ):
-            params['provider'] = arguments
-            temp = params['provider']
-            print(temp)
-
-            valid = ["digitalocean", "google cloud", "amazon web services"]
-
-            if (temp.lower() in valid):
-                await message.channel.send(f"Your provider is {temp}")
+            if handle_provider(arguments):
+                await message.channel.send(f"Your provider is {params.provider}")
             else:
                 await message.channel.send(f"We do not support this provider yet")
-
 
         if (message.content.startswith("~region ")):
             temp = arguments
