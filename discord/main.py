@@ -40,6 +40,8 @@ class MyClient(discord.Client):
     regions_string = "\n1. USA\n2. UK\n3. IN"
     current_prompt = -1
 
+    OS_string = "\n1. Arch Linux"
+
     async def find(self, queries, string):
         for q in queries:
             if q in string:
@@ -64,14 +66,31 @@ class MyClient(discord.Client):
 
         if success:
             await message.channel.send(f"You have selected {params['provider']} as your provider")
-            current_prompt = 1
+            self.current_prompt = 1
             await message.channel.send("Where would your VM like to live?" + self.regions_string)
             return True
 
         return False
 
-    async def handle_regions(self, message):
-        ...
+    async def handle_region(self, message):
+        success = False
+        if (await self.find(["us", "states", "unitedstates", "united states", "america"], message.content.lower())):
+                params["region"] = "USA"
+                success = True
+
+        if (await self.find(["uk", "kingdom", "unitedkingdom", "united kingdom", "england", "britian"], message.content.lower())):
+            params["region"] = "UK"
+            success = True
+
+        if (await self.find(["india", "in", "bharat"], message.content.lower())):
+            params["region"] = "IN"
+            success = True
+
+        if success:
+            await message.channel.send(f"You have selected {params['region']} as your region")
+            self.current_prompt = 2
+            await message.channel.send("What OS would you like to use" + self.OS_string)
+            return True
 
     async def create_mode(self, message):
         if message.content == "~cancel":
@@ -89,8 +108,8 @@ class MyClient(discord.Client):
             return
 
         if self.current_prompt == 1:
-            if not self.handle_provider(message):
-                await message.channel.send("Sorry couldn't understand that, please try again")
+            if not await self.handle_region(message):
+                await message.channel.send("Excuse me wtf, please try again")
             return
 
 
