@@ -39,6 +39,38 @@ class MyClient(discord.Client):
     async def on_ready(self):
         print(f"Logged on as {self.user}!")
 
+    async def handle_provider(self, message):
+        success = False
+        if ("google" in message.content.lower() or
+            "gcp" in message.content.lower() or
+            "3" in message.content.lower()):
+                params["provider"] = "Google Cloud Platform"
+                success = True
+
+        if ("amazon" in message.content.lower() or
+        "aws" in message.content.lower() or
+        "2" in message.content.lower()):
+            params["provider"] = "AWS"
+            success = True
+
+        if ("digitalocean" in message.content.lower() or
+        "digital" in message.content.lower() or
+        "1" in message.content.lower() or
+        "ocean" in message.content.lower()):
+            params["provider"] = "DigitalOcean"
+            success = True
+
+        if success:
+            await message.channel.send(f"You have selected {params['provider']} as your provider")
+            current_prompt = 1
+            await message.channel.send("Where would your VM like to live?" + self.regions_string)
+            return True
+
+        return False
+
+    async def handle_regions(self, message):
+        ...
+
     async def create_mode(self, message):
         if message.content == "~cancel":
             await message.channel.send("All settings have been discarded, returning to normal mode")
@@ -50,36 +82,16 @@ class MyClient(discord.Client):
             return
 
         if self.current_prompt == 0:
-            if ("google" in message.content.lower() or
-            "gcp" in message.content.lower() or
-            "3" in message.content.lower()):
-                params["provider"] = "Google"
-                await message.channel.send("You have selected Google Cloud Platform as your provider")
-                current_prompt = 1
-                await message.channel.send("Where would your VM like to live?" + self.regions_string)
-                return
-
-            if ("amazon" in message.content.lower() or
-            "aws" in message.content.lower() or
-            "2" in message.content.lower()):
-                params["provider"] = "Amazon"
-                await message.channel.send("You have selected AWS as your provider")
-                current_prompt = 1
-                await message.channel.send("Where would your VM like to live?" + self.regions_string)
-                return
-
-            if ("digitalocean" in message.content.lower() or
-            "digital" in message.content.lower() or
-            "1" in message.content.lower() or
-            "ocean" in message.content.lower()):
-                params["provider"] = "DigitalOcean"
-                await message.channel.send("You have selected DigitalOcean Platform as your provider")
-                current_prompt = 1
-                await message.channel.send("Where would your VM like to live?" + self.regions_string)
-                return
-
-            await message.channel.send("Sorry couldn't understand that, please try again")
+            if not self.handle_provider(message):
+                await message.channel.send("Sorry couldn't understand that, please try again")
             return
+
+        if self.current_prompt == 1:
+            if not self.handle_provider(message):
+                await message.channel.send("Sorry couldn't understand that, please try again")
+            return
+
+
 
     async def on_message(self, message):
         if (message.author == self.user or not message.content.startswith("~")):
