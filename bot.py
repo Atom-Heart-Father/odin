@@ -2,19 +2,23 @@ from logging import error
 from dotenv import dotenv_values
 from main import father
 
-config = dotenv_values(".env")
 
 import json
 import discord
 
+config = dotenv_values(".env")
+
 # SECRET_KEY = os.getenv("TOKEN")
-SECRET_KEY = config["TOKEN"]
+# SECRET_KEY = config["TOKEN"]
+SECRET_KEY = "ODM3ODg2NDUxNzM4NzM4NzU4.YIzEkQ.lNJyMaA3xSuXVJJEjJYio9ASccw"
 
 params = None
 countries = None
 
-with open("./../../params.json", "r") as read_file:
+# with open("./../../params.json", "r") as read_file:
+with open("params.json", "r") as read_file:
     params = json.load(read_file)
+
 
 async def make_child():
     details = {
@@ -43,27 +47,13 @@ async def make_child():
         if params["Package"] == 1:
             details["memory"] = "1"
             details["processor"] = "1"
-        elif params["Package"] == 2:
-            details["memory"] = "2"
-            details["processor"] = "1"
-        elif params["Package"] == 3:
-            details["memory"] = "2"
-            details["processor"] = "2"
-        elif params["Package"] == 4:
-            details["memory"] = "4"
-            details["processor"] = "2"
-        elif params["Package"] == 5:
-            details["memory"] = "8"
-            details["processor"] = "4"
-        elif params["Package"] == 6:
-            details["memory"] = "8"
-            details["processor"] = "4"
 
     if await father(details):
         return True
     else:
         return False
     print(details)
+
 
 class MyClient(discord.Client):
 
@@ -110,8 +100,8 @@ Follow the instructions prompted by the bot to finish the set-up.```"""
     async def handle_provider(self, message):
         success = False
         if (await self.find(["google", "gcp", "3"], message.content.lower())):
-                params["provider"] = "Google Cloud Platform"
-                success = True
+            params["provider"] = "Google Cloud Platform"
+            success = True
 
         elif (await self.find(["amazon", "web", "services", "aws", "2"], message.content.lower())):
             params["provider"] = "AWS"
@@ -162,8 +152,8 @@ Follow the instructions prompted by the bot to finish the set-up.```"""
     async def handle_os(self, message):
         success = False
         if (await self.find(["ubuntu", "2"], message.content.lower())):
-                params["OS"] = "ubuntu-16-04-x64"
-                success = True
+            params["OS"] = "ubuntu-16-04-x64"
+            success = True
 
         elif (await self.find(["fedora", "1"], message.content.lower())):
             params["OS"] = "fedora-34-x64"
@@ -177,13 +167,12 @@ Follow the instructions prompted by the bot to finish the set-up.```"""
 
         return False
 
-
     async def handle_package(self, message):
         success = False
 
         try:
             number = int(message.content.lower()[1:])
-            if params["provider"] == "DigitalOcean" and  0 < number <= 5:
+            if params["provider"] == "DigitalOcean" and 0 < number <= 5:
                 success = True
             elif params["provider"] == "AWS" and number == 1:
                 success = True
@@ -198,7 +187,10 @@ Follow the instructions prompted by the bot to finish the set-up.```"""
             return 70
         if success:
             params["Package"] = number
-            await message.channel.send(f"You have selected package {self.packages_list[number-1]}, seems like you have a lot of money")
+            if(params["provider"] == 'AWS'):
+                await message.channel.send(f"You have selected package {self.packages_list['AWS'][number-1]}, seems like you have a lot of money")
+            else:
+                await message.channel.send(f"You have selected package {self.packages_list['DigitalOcean'][number-1]}, seems like you have a lot of money")
             self.current_prompt = 4
             await message.channel.send(f"Looks like things are done! Have a cup of coffee, your VM, {params['name']},  will be ready in about a minute!")
             self.mode = 0
@@ -273,6 +265,7 @@ Please select one of the following providers:\n1. DigitalOcean\n2. AWS\n3. Googl
 
             await message.channel.send(first_message)
             self.current_prompt = 0
+
 
 client = MyClient()
 client.run(SECRET_KEY)

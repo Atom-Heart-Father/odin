@@ -3,9 +3,10 @@ from python_terraform import Terraform, IsFlagged
 
 # DO_PATH = os.path.abspath(os.path.join(os.curdir, "configs", "digitalocean"))
 DO_PATH = os.path.abspath(os.path.join(os.curdir, "configs", "digitalocean"))
-os.chdir(DO_PATH)
+AWS_PATH = os.path.abspath(os.path.join(os.curdir, "configs", "aws"))
 
 t = Terraform()
+
 
 def get_instance_type(provider: str, mem: str, cpu: str):
     resource = str(cpu) + "vcpu-" + str(mem) + "gb"
@@ -26,8 +27,10 @@ def get_instance_type(provider: str, mem: str, cpu: str):
 
     return None
 
-async def father(details = None):
+
+async def father(details=None):
     deets = {
+        "provider": "DigitalOcean",
         "os": "ubuntu-16-04-x64",
         "name": "TestPy",
         "memory": "1",
@@ -38,28 +41,53 @@ async def father(details = None):
     if details:
         deets = details
 
-    return_code, stdout, stderr = t.plan(
-        out=DO_PATH+'/out.txt',
-        vars={
-            "image": deets["os"],
-            "name": deets["name"],
-            "size": get_instance_type("DigitalOcean", deets["memory"], deets["processor"]),
-            "region": deets["region"],
-        }
-    )
+    if deets['provider'] == "DigitalOcean":
+        os.chdir(DO_PATH)
+        return_code, stdout, stderr = t.plan(
+            out=DO_PATH+'/out.txt',
+            vars={
+                "image": deets["os"],
+                "name": deets["name"],
+                "size": get_instance_type("DigitalOcean", deets["memory"], deets["processor"]),
+                "region": deets["region"],
+            }
+        )
 
-    return_code, stdout, stderr = t.apply(
-        DO_PATH+'/out.txt',
-        var=None,
-        **{"skip_plan": True, "auto_approve": IsFlagged, "capture_output": True}
-    )
+        return_code, stdout, stderr = t.apply(
+            DO_PATH+'/out.txt',
+            var=None,
+            **{"skip_plan": True, "auto_approve": IsFlagged, "capture_output": True}
+        )
 
-    if stderr:
-        print(str(stderr))
-        return False
-    else:
-        print(str(stdout))
-        return True
+        if stderr:
+            print(str(stderr))
+            return False
+        else:
+            print(str(stdout))
+            return True
+
+    elif deets['provider'] == "AWS":
+        os.chdir(AWS_PATH)
+        return_code, stdout, stderr = t.plan(
+            out=DO_PATH+'/out.txt',
+            vars={
+                "name": deets["name"],
+                "region": deets["region"],
+            }
+        )
+
+        return_code, stdout, stderr = t.apply(
+            DO_PATH+'/out.txt',
+            var=None,
+            **{"skip_plan": True, "auto_approve": IsFlagged, "capture_output": True}
+        )
+
+        if stderr:
+            print(str(stderr))
+            return False
+        else:
+            print(str(stdout))
+            return True
 
 if __name__ == "__main__":
     father()
