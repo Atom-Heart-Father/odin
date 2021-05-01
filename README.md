@@ -38,6 +38,10 @@
    ```sh
    env\Scripts\activate
    ```
+   or
+   ```sh
+   source env/bin/activate
+   ```
 4. Install all requirements
    ```sh
    pip install -r requirements.txt
