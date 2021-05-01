@@ -2,8 +2,6 @@
 
 <img src="https://github.com/Atom-Heart-Father/odin/blob/main/assets/Odin.png"/>
 
-ChatOps bot for fully automated Cloud Infrastructure deployments using Terraform, the popular IaC (Infrastructure as Code) tool.
-
 ## About
 
 This pandemic has forced a change in the usual environment one would work in. It is evident that there is major lack of resources and to compensate for the situation, many companies have been forced to issue laptops and other essentials to create a working environment for the employees at comfort of their home. Some companies do not have the resources to avail each and every employee, adequate tools to create an efficient workspace resulting in them losing their jobs.

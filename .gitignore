@@ -130,3 +130,5 @@ dmypy.json
 
 nlp/data/entities
 nlp/data/intents
+
+*.tfvars
