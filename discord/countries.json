@@ -1,7 +1,11 @@
 {
-    countries: [
+    "countries": [
         "USA",
         "UK",
-""
+        "IN",
+        "RUS",
+        "NP",
+        "SYR",
+        "UAE"
     ]
 }

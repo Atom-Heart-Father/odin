@@ -1,47 +1,85 @@
 import os
+import json
 import discord
 
-SECRET_KEY = os.getenv("TOKEN")
+# SECRET_KEY = os.getenv("TOKEN")
+SECRET_KEY = "ODM3ODg2NDUxNzM4NzM4NzU4.YIzEkQ.B_JaAGVL0HW8qPh4EQPv1wyydZU"
 print(SECRET_KEY)
 
-params = {
-    'token': '',
-    'provider': 'DigitalOcean',
-    'region': 'USA',
-    'distribution': 'Arch'
-}
 
-countries = [
-    "us",
-    "uk",
-    "in"
-]
+params = None
+countries = None
 
-distributions = [
-    "ubuntu 16",
-    "ubuntu 18",
-    "ubuntu 20",
-    "fedora 33",
-    "fedora 34",
-    "winhoes",
-]
+with open("params.json", "r") as read_file:
+    params = json.load(read_file)
 
-
-def handle_dig_ocean():
-    params['provider'] = "DigitalOcean"
-
-
-def handle_provider(provider):
-    valid = ["digitalocean", "google cloud", "amazon web services"]
-    if (not provider.lower() in valid):
-        return False
-    if provider == 'DigitalOcean':
-        return handle_dig_ocean()
-
+with open("countries.json", "r") as read_file:
+    countries = json.load(read_file)["countries"]
 
 class MyClient(discord.Client):
+
+    # 0 is normal mode
+    # 1 is create mode
+    # in create mode, the bot starts interrogating you
+    mode = 0
+
+    create_commands = [
+        "provider",
+        "region",
+        "os",
+        "cpu",
+        "ram",
+        "storage",
+        "token"
+    ]
+
+    regions_string = "\n1. USA\n2. UK\n3. IN"
+    current_prompt = -1
+
     async def on_ready(self):
-        print('Logged on as {0}!'.format(self.user))
+        print(f"Logged on as {self.user}!")
+
+    async def create_mode(self, message):
+        if message.content == "~cancel":
+            await message.channel.send("All settings have been discarded, returning to normal mode")
+            self.mode = 0
+            return
+
+        if message.content == "~create":
+            await message.channel.send("You are already in create mode")
+            return
+
+        if self.current_prompt == 0:
+            if ("google" in message.content.lower() or
+            "gcp" in message.content.lower() or
+            "3" in message.content.lower()):
+                params["provider"] = "Google"
+                await message.channel.send("You have selected Google Cloud Platform as your provider")
+                current_prompt = 1
+                await message.channel.send("Where would your VM like to live?" + self.regions_string)
+                return
+
+            if ("amazon" in message.content.lower() or
+            "aws" in message.content.lower() or
+            "2" in message.content.lower()):
+                params["provider"] = "Amazon"
+                await message.channel.send("You have selected AWS as your provider")
+                current_prompt = 1
+                await message.channel.send("Where would your VM like to live?" + self.regions_string)
+                return
+
+            if ("digitalocean" in message.content.lower() or
+            "digital" in message.content.lower() or
+            "1" in message.content.lower() or
+            "ocean" in message.content.lower()):
+                params["provider"] = "DigitalOcean"
+                await message.channel.send("You have selected DigitalOcean Platform as your provider")
+                current_prompt = 1
+                await message.channel.send("Where would your VM like to live?" + self.regions_string)
+                return
+
+            await message.channel.send("Sorry couldn't understand that, please try again")
+            return
 
     async def on_message(self, message):
         if (message.author == self.user or not message.content.startswith("~")):
@@ -51,47 +89,25 @@ class MyClient(discord.Client):
 
         # the first thing iz command
         command = contents[0][1:]  # discard the first character
-        # errthing else is args
-        arguments = " ".join(contents[1:])  # 2nd thing is args
+        if self.mode == 1:
+            await self.create_mode(message)
+            return
 
-        if (command == "token"):
-            params['token'] = arguments
-            await message.channel.send(f"Your token is {params['token']}")
+        if (command in self.create_commands):
+            await message.channel.send("You need to switch to create mode. Try typing in ~create")
+            return
 
-        if (command == "region"):
-            if arguments.lower() in countries:
-                params['region'] = arguments
-                await message.channel.send(f"Your region is {params['region']}")
-            else:
-                question = "Please choose one of these country codes:\n" + "\n".join(countries)
-                await message.channel.send(question)
+        if (command != 'create'):
+            await message.channel.send("Help is on its way")
+            return
 
-        # if(command == "ram"):
-
-
-        if (command == "distro"):
-            if arguments.lower() in distributions:
-                params['distribution'] = arguments
-                await message.channel.send(f"Your distro is {params['distribution']}")
-            else:
-                question = "Please choose one of these distributions:\n" + "\n".join(distributions)
-                await message.channel.send(question)
-            # await message.channel.send(f"imma distribute yo mamma in tha hood")
-
-        if (command == "provider"):
-            if handle_provider(arguments):
-                await message.channel.send(f"Your provider is {params['provider']}")
-            else:
-                await message.channel.send(f"We do not support this provider yet")
-
-        if (command == "default"):
-            if (len(arguments) == 0):
-                await message.channel.send(f"try again noob")
-            else:
-                question = "Setting things up default\n"
-                for key in params.keys:
-                    question = question + "\n" + key + ": " + params[key]
-                await message.channel.send(question)
+        if (command == 'create'):
+            self.mode = 1
+            await message.channel.send("You will now be prompted with questions to select the specs for yo vm")
+            await message.channel.send("Send ~cancel to cancel your subscription to NORD VPN")
+            await message.channel.send("Remember to prefix your replies with ~")
+            await message.channel.send("Please select one of the following providers:\n1. DigitalOcean\n2. AWS\n3. GoogleCloudPlatform")
+            self.current_prompt = 0
 
 
 client = MyClient()
