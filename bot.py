@@ -21,23 +21,43 @@ async def make_child():
         "os": params["OS"],
         "name": params["name"],
         "region": params["region"],
+        "provider": params["provider"]
     }
-
-    if params["Package"] == 1:
-        details["memory"] = "1"
-        details["processor"] = "1"
-    elif params["Package"] == 2:
-        details["memory"] = "2"
-        details["processor"] = "1"
-    elif params["Package"] == 3:
-        details["memory"] = "2"
-        details["processor"] = "2"
-    elif params["Package"] == 4:
-        details["memory"] = "4"
-        details["processor"] = "2"
-    elif params["Package"] == 5:
-        details["memory"] = "8"
-        details["processor"] = "4"
+    if params["provider"] == "DigitalOcean":
+        if params["Package"] == 1:
+            details["memory"] = "1"
+            details["processor"] = "1"
+        elif params["Package"] == 2:
+            details["memory"] = "2"
+            details["processor"] = "1"
+        elif params["Package"] == 3:
+            details["memory"] = "2"
+            details["processor"] = "2"
+        elif params["Package"] == 4:
+            details["memory"] = "4"
+            details["processor"] = "2"
+        elif params["Package"] == 5:
+            details["memory"] = "8"
+            details["processor"] = "4"
+    elif params["provider"] == "AWS":
+        if params["Package"] == 1:
+            details["memory"] = "1"
+            details["processor"] = "1"
+        elif params["Package"] == 2:
+            details["memory"] = "2"
+            details["processor"] = "1"
+        elif params["Package"] == 3:
+            details["memory"] = "2"
+            details["processor"] = "2"
+        elif params["Package"] == 4:
+            details["memory"] = "4"
+            details["processor"] = "2"
+        elif params["Package"] == 5:
+            details["memory"] = "8"
+            details["processor"] = "4"
+        elif params["Package"] == 6:
+            details["memory"] = "8"
+            details["processor"] = "4"
 
     if await father(details):
         return True
@@ -62,13 +82,18 @@ Follow the instructions prompted by the bot to finish the set-up.```"""
 
     OS_string = "\n1. Fedora\n2. Ubuntu 16"
 
-    packages_list = [
-        "1. 1 CPU, 1 GB RAM, 25 GB SSD",
-        "2. 1 CPU, 2GB RAM, 50GB SSD",
-        "3. 2 CPU, 2GB RAM, 60GB SSD",
-        "4. 2 CPU, 4GB RAM, 80GB SSD",
-        "5. 4 CPU, 8GB RAM, 160GB SSD"
-    ]
+    packages_list = {
+        "DigitalOcean": [
+            "1. 1 CPU, 1 GB RAM, 25 GB SSD",
+            "2. 1 CPU, 2GB RAM, 50GB SSD",
+            "3. 2 CPU, 2GB RAM, 60GB SSD",
+            "4. 2 CPU, 4GB RAM, 80GB SSD",
+            "5. 4 CPU, 8GB RAM, 160GB SSD"
+        ],
+        "AWS": [
+            "1. 1 CPU, 1 GB RAM [nano]",
+        ]
+    }
 
     async def find(self, queries, string):
         for q in queries:
@@ -107,15 +132,25 @@ Follow the instructions prompted by the bot to finish the set-up.```"""
     async def handle_region(self, message):
         success = False
         if (await self.find(["us", "states", "unitedstates", "united states", "america", "1"], message.content.lower())):
-            params["region"] = "nyc3"
+            if (params["provider"] == "DigitalOcean"):
+                params["region"] = "nyc3"
+            elif (params["provider"] == "AWS"):
+                params["region"] = "us-west-2"
             success = True
 
         elif (await self.find(["uk", "kingdom", "unitedkingdom", "united kingdom", "england", "britian", "2"], message.content.lower())):
-            params["region"] = "lon1"
+            if (params["provider"] == "DigitalOcean"):
+                params["region"] = "eu-west-2"
+            elif (params["provider"] == "AWS"):
+                params["region"] = "us-west-2"
             success = True
 
         elif (await self.find(["india", "in", "bharat", "3"], message.content.lower())):
-            params["region"] = "blr1"
+            if (params["provider"] == "DigitalOcean"):
+                params["region"] = "blr1"
+            elif (params["provider"] == "AWS"):
+                params["region"] = "ap-south-1"
+
             success = True
 
         if success:
@@ -137,7 +172,7 @@ Follow the instructions prompted by the bot to finish the set-up.```"""
         if success:
             await message.channel.send(f"You have selected {params['OS']} as your operating system")
             self.current_prompt = 3
-            await message.channel.send("What package would you like to use?\n" + "\n".join(self.packages_list))
+            await message.channel.send("What package would you like to use?\n" + "\n".join(self.packages_list[params['provider']]))
             return True
 
         return False
@@ -148,8 +183,13 @@ Follow the instructions prompted by the bot to finish the set-up.```"""
 
         try:
             number = int(message.content.lower()[1:])
-            if 0 < number <= 5:
+            if params["provider"] == "DigitalOcean" and  0 < number <= 5:
                 success = True
+            elif params["provider"] == "AWS" and number == 1:
+                success = True
+            elif params["provider"] == "AWS" and number != 1:
+                await message.channel.send("We only support the micro package cause its free and we don't wanna rack up bills")
+                return 69
             else:
                 await message.channel.send("Invalid package selected")
                 return 69
