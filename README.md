@@ -1,6 +1,18 @@
 # Odin
 
+<img src="https://github.com/Atom-Heart-Father/odin/blob/main/assets/Odin.png"/>
+
 ChatOps bot for fully automated Cloud Infrastructure deployments using Terraform, the popular IaC (Infrastructure as Code) tool.
+
+## About
+
+This pandemic has forced a change in the usual environment one would work in. It is evident that there is major lack of resources and to compensate for the situation, many companies have been forced to issue laptops and other essentials to create a working environment for the employees at comfort of their home. Some companies do not have the resources to avail each and every employee, adequate tools to create an efficient workspace resulting in them losing their jobs.
+<br>
+<br>
+Even for major companies, there is a large strain on the IT department of companies, and also on the employees themselves to get accustomed to the new working environment, especially those in critical departments such as Operations, who need a machine to deploy these cloud resources from. We found a solution which helps solve this problem entirely. It deploys cloud infrastructure simply with the help of a chat on a mobile phone. We are using Disocrd as the chat platform.
+<br>
+<br>
+The bot uses DialogFlow and processes natural language which makes it very simple for people to communicate with the bot. It proves to be secure, as the bot requires the user to give necessary details for it to work. The deployment is generated using Terraform. It is a popular IaaC tool used commonly. It is quite efficient in preventing faulty deployments and gives an added advantage of integrating over 131 cloud providers, which includes providers with major market share, as well as several other smaller providers. Adding a provider is as simple as plug-and-play and this way it helps in aiding employees and companies to get an efficient workspace set in their homes.
 
 ## Features
 
