@@ -2,13 +2,12 @@ import os
 from python_terraform import Terraform, IsFlagged
 
 # DO_PATH = os.path.abspath(os.path.join(os.curdir, "configs", "digitalocean"))
-DO_PATH = os.path.abspath(os.path.join(os.curdir, "configs", "digitalocean", "do.tf"))
+DO_PATH = os.path.abspath(os.path.join(os.curdir, "configs", "digitalocean"))
 print(DO_PATH)
 
+os.chdir(DO_PATH)
+
 t = Terraform()
-
-t.init(DO_PATH)
-
 
 def get_instance_type(provider: str, mem: str, cpu: str):
     resource = cpu + "-" + mem
@@ -31,23 +30,27 @@ def get_instance_type(provider: str, mem: str, cpu: str):
 
 
 deets = {
-    # "os": "Ubuntu 16",
     "os": "ubuntu-16-04-x64",
-    "name": "Test",
+    "name": "TestPy",
     "memory": "1gb",
     "processor": "1vcpu",
-    # "region": "United States",
-    "region": "us-east-2",
+    "region": "nyc3",
 }
 
-return_code, stdout, stderr = t.apply(
-    DO_PATH,
+return_code, stdout, stderr = t.plan(
+    out=DO_PATH+'/out.txt',
     vars={
         "image": deets["os"],
         "name": deets["name"],
         "size": get_instance_type("DigitalOcean", deets["memory"], deets["processor"]),
         "region": deets["region"],
-    },
+    }
+)
+
+# Y DOEZ U NOT WERK??!! Y MUST WE SCAM YOU??!!
+return_code, stdout, stderr = t.apply(
+    DO_PATH+'/out.txt',
+    var=None,
     **{"skip_plan": True, "auto_approve": IsFlagged, "capture_output": True}
 )
 

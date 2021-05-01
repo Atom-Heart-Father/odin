@@ -9,7 +9,7 @@ terraform {
 
 variable "do_token" {
     description = "DigitalOcean API Token"
-    default = ""
+    default = "f0270deb9068cbc836ba3280418743bce416ece6f693e189c762baf42a3c2fff"
 }
 
 variable "name" {
