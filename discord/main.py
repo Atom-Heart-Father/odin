@@ -5,9 +5,9 @@ SECRET_KEY = os.getenv("TOKEN")
 print(SECRET_KEY)
 
 params = {
-    token: '',
-    provider: '',
-    region: ''
+    'token': '',
+    'provider': '',
+    'region': ''
 }
 
 
