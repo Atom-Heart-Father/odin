@@ -22,6 +22,11 @@ with open("countries.json", "r") as read_file:
 
 class MyClient(discord.Client):
 
+    help_message = """```To get started, enter  ‘~create’.
+Certain necessary questions pop up which will help set up the necessary VM.
+To stop the process at any stage please enter ‘~cancel’.
+Follow the instructions prompted by the bot to finish the set-up.```"""
+
     # 0 is normal mode
     # 1 is create mode
     # in create mode, the bot starts interrogating you
@@ -238,7 +243,7 @@ class MyClient(discord.Client):
             return
 
         if (command != 'create'):
-            await message.channel.send("Help is on its way")
+            await message.channel.send(self.help_message)
             return
 
         if (command == 'create'):
