@@ -133,3 +133,5 @@ nlp/data/entities
 nlp/data/intents
 
 lock.json
+terraform.tfstate
+terraform.tfstate.backup
