@@ -1,11 +1,15 @@
 import os
+
+from dotenv import dotenv_values
+
+config = dotenv_values(".env")
+
+print(config)
 import json
 import discord
 
 # SECRET_KEY = os.getenv("TOKEN")
-SECRET_KEY = "ODM3ODg2NDUxNzM4NzM4NzU4.YIzEkQ.B_JaAGVL0HW8qPh4EQPv1wyydZU"
-print(SECRET_KEY)
-
+SECRET_KEY = config["TOKEN"]
 
 params = None
 countries = None
