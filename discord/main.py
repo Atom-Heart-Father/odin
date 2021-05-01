@@ -1,10 +1,10 @@
+from itertools import chain
 import os
 
 from dotenv import dotenv_values
 
 config = dotenv_values(".env")
 
-print(config)
 import json
 import discord
 
@@ -111,6 +111,33 @@ class MyClient(discord.Client):
             await message.channel.send("How many CPUs would you like to use?")
             return True
 
+    async def handle_cpu(self, message):
+        success = False
+        # if (await self.find(["ubuntu"], message.content.lower())):
+        #         params["OS"] = "Ubuntu 16.0"
+        #         success = True
+
+        # elif (await self.find(["arch"], message.content.lower())):
+        #     params["OS"] = "Arch Linux"
+        #     success = True
+
+        try:
+            number = int(message.content.lower()[1:])
+            if 0 < number < 69:
+                params["CPUs"] = number
+                success = True
+            else:
+                await message.channel.send("The number of CPUs should be between 1 and 69")
+        except:
+            await message.channel.send("Couldn't parse the number of CPUs, are you sure you entered a number (eg: ~55)")
+        if success:
+            await message.channel.send(f"You have selected {params['CPUs']} CPU cores for your VM, seems like you have a lot of money")
+            self.current_prompt = 4
+            await message.channel.send("How much RAM would you like?")
+            return True
+
+        return False
+
     async def create_mode(self, message):
         if message.content == "~cancel":
             await message.channel.send("All settings have been discarded, returning to normal mode")
@@ -135,7 +162,10 @@ class MyClient(discord.Client):
             if not await self.handle_os(message):
                 await self.send_error(message)
             return
-
+        elif self.current_prompt == 3:
+            if not await self.handle_cpu(message):
+                await self.send_error(message)
+            return
 
     async def on_message(self, message):
         if (message.author == self.user or not message.content.startswith("~")):
