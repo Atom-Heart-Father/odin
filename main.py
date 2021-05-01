@@ -8,7 +8,7 @@ os.chdir(DO_PATH)
 t = Terraform()
 
 def get_instance_type(provider: str, mem: str, cpu: str):
-    resource = cpu + "vcpu-" + mem + "gb"
+    resource = str(cpu) + "vcpu-" + str(mem) + "gb"
     mappings = {"DigitalOcean": {}}
     mappings["DigitalOcean"] = {
         "1vcpu-1gb": "s-1vcpu-1gb",

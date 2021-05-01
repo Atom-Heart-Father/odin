@@ -1,6 +1,3 @@
-from itertools import chain
-import os
-
 from dotenv import dotenv_values
 from main import father
 
@@ -15,10 +12,10 @@ SECRET_KEY = config["TOKEN"]
 params = None
 countries = None
 
-with open("params.json", "r") as read_file:
+with open("./../../params.json", "r") as read_file:
     params = json.load(read_file)
 
-with open("countries.json", "r") as read_file:
+with open("./../../countries.json", "r") as read_file:
     countries = json.load(read_file)["countries"]
 
 
@@ -27,7 +24,8 @@ async def make_child():
         "os": params["OS"],
         "name": params["name"],
         "memory": params["RAM"],
-        "region": params["region"]
+        "region": params["region"],
+        "processor": params["CPUs"],
     }
 
     if await father(details):
@@ -101,17 +99,17 @@ Follow the instructions prompted by the bot to finish the set-up.```"""
     async def handle_region(self, message):
         success = False
         if (await self.find(["us", "states", "unitedstates", "united states", "america", "1"], message.content.lower())):
-            params["region"] = "USA"
+            params["region"] = "nyc3"
             success = True
-            await message.channel.send("Thing will be made at NY-3")
+            await message.channel.send("Thing will be made at NYC-3")
 
         elif (await self.find(["uk", "kingdom", "unitedkingdom", "united kingdom", "england", "britian", "2"], message.content.lower())):
-            params["region"] = "UK"
+            params["region"] = "lon1"
             success = True
             await message.channel.send("Thing will be made at LON-1")
 
         elif (await self.find(["india", "in", "bharat", "3"], message.content.lower())):
-            params["region"] = "IN"
+            params["region"] = "blr1"
             success = True
             await message.channel.send("Thing will be made at BLR-1")
 
