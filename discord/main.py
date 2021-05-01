@@ -40,7 +40,7 @@ class MyClient(discord.Client):
     regions_string = "\n1. USA\n2. UK\n3. IN"
     current_prompt = -1
 
-    OS_string = "\n1. Arch Linux"
+    OS_string = "\n1. Arch Linux\n2. Ubuntu 16"
 
     async def find(self, queries, string):
         for q in queries:
@@ -50,17 +50,20 @@ class MyClient(discord.Client):
     async def on_ready(self):
         print(f"Logged on as {self.user}!")
 
+    async def send_error(self, message):
+        await message.channel.send("Sorry couldn't get that, please try again")
+
     async def handle_provider(self, message):
         success = False
         if (await self.find(["google", "gcp", "3"], message.content.lower())):
                 params["provider"] = "Google Cloud Platform"
                 success = True
 
-        if (await self.find(["amazon", "web", "services", "aws", "2"], message.content.lower())):
+        elif (await self.find(["amazon", "web", "services", "aws", "2"], message.content.lower())):
             params["provider"] = "AWS"
             success = True
 
-        if (await self.find(["digital", "ocean", "1"], message.content.lower())):
+        elif (await self.find(["digital", "ocean", "1"], message.content.lower())):
             params["provider"] = "DigitalOcean"
             success = True
 
@@ -78,11 +81,11 @@ class MyClient(discord.Client):
                 params["region"] = "USA"
                 success = True
 
-        if (await self.find(["uk", "kingdom", "unitedkingdom", "united kingdom", "england", "britian"], message.content.lower())):
+        elif (await self.find(["uk", "kingdom", "unitedkingdom", "united kingdom", "england", "britian"], message.content.lower())):
             params["region"] = "UK"
             success = True
 
-        if (await self.find(["india", "in", "bharat"], message.content.lower())):
+        elif (await self.find(["india", "in", "bharat"], message.content.lower())):
             params["region"] = "IN"
             success = True
 
@@ -90,6 +93,22 @@ class MyClient(discord.Client):
             await message.channel.send(f"You have selected {params['region']} as your region")
             self.current_prompt = 2
             await message.channel.send("What OS would you like to use" + self.OS_string)
+            return True
+
+    async def handle_os(self, message):
+        success = False
+        if (await self.find(["ubuntu"], message.content.lower())):
+                params["OS"] = "Ubuntu 16.0"
+                success = True
+
+        elif (await self.find(["arch"], message.content.lower())):
+            params["OS"] = "Arch Linux"
+            success = True
+
+        if success:
+            await message.channel.send(f"You have selected {params['OS']} as your operating system")
+            self.current_prompt = 3
+            await message.channel.send("How many CPUs would you like to use?")
             return True
 
     async def create_mode(self, message):
@@ -104,14 +123,18 @@ class MyClient(discord.Client):
 
         if self.current_prompt == 0:
             if not await self.handle_provider(message):
-                await message.channel.send("Sorry couldn't understand that, please try again")
+                await self.send_error(message)
             return
 
-        if self.current_prompt == 1:
+        elif self.current_prompt == 1:
             if not await self.handle_region(message):
-                await message.channel.send("Excuse me wtf, please try again")
+                await self.send_error(message)
             return
 
+        elif self.current_prompt == 2:
+            if not await self.handle_os(message):
+                await self.send_error(message)
+            return
 
 
     async def on_message(self, message):
