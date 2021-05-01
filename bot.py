@@ -1,6 +1,6 @@
 from logging import error
 from dotenv import dotenv_values
-# from main import father
+from main import father
 
 config = dotenv_values(".env")
 
@@ -39,13 +39,11 @@ async def make_child():
         details["memory"] = "8"
         details["processor"] = "4"
 
-    # if await father(details):
-    #     return True
-    # else:
-    #     return False
+    if await father(details):
+        return True
+    else:
+        return False
     print(details)
-
-
 
 class MyClient(discord.Client):
 
