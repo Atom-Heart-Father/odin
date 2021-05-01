@@ -3,14 +3,12 @@ from python_terraform import Terraform, IsFlagged
 
 # DO_PATH = os.path.abspath(os.path.join(os.curdir, "configs", "digitalocean"))
 DO_PATH = os.path.abspath(os.path.join(os.curdir, "configs", "digitalocean"))
-print(DO_PATH)
-
 os.chdir(DO_PATH)
 
 t = Terraform()
 
 def get_instance_type(provider: str, mem: str, cpu: str):
-    resource = cpu + "-" + mem
+    resource = cpu + "vcpu-" + mem + "gb"
     mappings = {"DigitalOcean": {}}
     mappings["DigitalOcean"] = {
         "1vcpu-1gb": "s-1vcpu-1gb",
@@ -28,33 +26,40 @@ def get_instance_type(provider: str, mem: str, cpu: str):
 
     return None
 
-
-deets = {
-    "os": "ubuntu-16-04-x64",
-    "name": "TestPy",
-    "memory": "1gb",
-    "processor": "1vcpu",
-    "region": "nyc3",
-}
-
-return_code, stdout, stderr = t.plan(
-    out=DO_PATH+'/out.txt',
-    vars={
-        "image": deets["os"],
-        "name": deets["name"],
-        "size": get_instance_type("DigitalOcean", deets["memory"], deets["processor"]),
-        "region": deets["region"],
+async def father(details = None):
+    deets = {
+        "os": "ubuntu-16-04-x64",
+        "name": "TestPy",
+        "memory": "1",
+        "processor": "1",
+        "region": "nyc3",
     }
-)
 
-# Y DOEZ U NOT WERK??!! Y MUST WE SCAM YOU??!!
-return_code, stdout, stderr = t.apply(
-    DO_PATH+'/out.txt',
-    var=None,
-    **{"skip_plan": True, "auto_approve": IsFlagged, "capture_output": True}
-)
+    if details:
+        deets = details
 
-if stderr:
-    print(str(stderr))
-else:
-    print(str(stdout))
+    return_code, stdout, stderr = t.plan(
+        out=DO_PATH+'/out.txt',
+        vars={
+            "image": deets["os"],
+            "name": deets["name"],
+            "size": get_instance_type("DigitalOcean", deets["memory"], deets["processor"]),
+            "region": deets["region"],
+        }
+    )
+
+    return_code, stdout, stderr = t.apply(
+        DO_PATH+'/out.txt',
+        var=None,
+        **{"skip_plan": True, "auto_approve": IsFlagged, "capture_output": True}
+    )
+
+    if stderr:
+        print(str(stderr))
+        return False
+    else:
+        print(str(stdout))
+        return True
+
+if __name__ == "__main__":
+    father()

@@ -1,9 +1,0 @@
-{
-    "token": "",
-    "region": "USA",
-    "provider": "Azure",
-    "RAM": "1",
-    "CPUs": "1",
-    "Storage": "10",
-    "OS": "Arch"
-}

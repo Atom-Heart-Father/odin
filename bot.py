@@ -2,6 +2,7 @@ from itertools import chain
 import os
 
 from dotenv import dotenv_values
+from main import father
 
 config = dotenv_values(".env")
 
@@ -20,9 +21,25 @@ with open("params.json", "r") as read_file:
 with open("countries.json", "r") as read_file:
     countries = json.load(read_file)["countries"]
 
+
+async def make_child():
+    details = {
+        "os": params["OS"],
+        "name": params["name"],
+        "memory": params["RAM"],
+        "region": params["region"]
+    }
+
+    if await father(details):
+        return True
+    else:
+        return False
+
+
+
 class MyClient(discord.Client):
 
-    help_message = """```To get started, enter  ‘~create’.
+    help_message = """```To get started, enter  ‘~create <InstanceName>’.
 Certain necessary questions pop up which will help set up the necessary VM.
 To stop the process at any stage please enter ‘~cancel’.
 Follow the instructions prompted by the bot to finish the set-up.```"""
@@ -45,7 +62,7 @@ Follow the instructions prompted by the bot to finish the set-up.```"""
     regions_string = "\n1. USA\n2. UK\n3. IN"
     current_prompt = -1
 
-    OS_string = "\n1. Arch Linux\n2. Ubuntu 16"
+    OS_string = "\n1. Fedora\n2. Ubuntu 16"
 
     async def find(self, queries, string):
         for q in queries:
@@ -84,16 +101,19 @@ Follow the instructions prompted by the bot to finish the set-up.```"""
     async def handle_region(self, message):
         success = False
         if (await self.find(["us", "states", "unitedstates", "united states", "america", "1"], message.content.lower())):
-                params["region"] = "USA"
-                success = True
+            params["region"] = "USA"
+            success = True
+            await message.channel.send("Thing will be made at NY-3")
 
         elif (await self.find(["uk", "kingdom", "unitedkingdom", "united kingdom", "england", "britian", "2"], message.content.lower())):
             params["region"] = "UK"
             success = True
+            await message.channel.send("Thing will be made at LON-1")
 
         elif (await self.find(["india", "in", "bharat", "3"], message.content.lower())):
             params["region"] = "IN"
             success = True
+            await message.channel.send("Thing will be made at BLR-1")
 
         if success:
             await message.channel.send(f"You have selected {params['region']} as your region")
@@ -104,11 +124,11 @@ Follow the instructions prompted by the bot to finish the set-up.```"""
     async def handle_os(self, message):
         success = False
         if (await self.find(["ubuntu", "2"], message.content.lower())):
-                params["OS"] = "Ubuntu 16.0"
+                params["OS"] = "ubuntu-16-04-x64"
                 success = True
 
-        elif (await self.find(["arch", "1"], message.content.lower())):
-            params["OS"] = "Arch Linux"
+        elif (await self.find(["fedora", "1"], message.content.lower())):
+            params["OS"] = "fedora-34-x64"
             success = True
 
         if success:
@@ -180,9 +200,13 @@ Follow the instructions prompted by the bot to finish the set-up.```"""
         if success:
             await message.channel.send(f"You have selected {params['Storage']} GBs of storage")
             self.current_prompt = 6
-            await message.channel.send("Looks like things are done! Have a cup of coffee, your VM will be ready!")
+            await message.channel.send(f"Looks like things are done! Have a cup of coffee, your VM, {params['name']},  will be ready in about a minute!")
             self.mode = 0
-            return True
+            if await make_child():
+                return True
+            else:
+                await message.channel.send("Sorry an error occured")
+                return False
 
         return False
 
@@ -247,8 +271,9 @@ Follow the instructions prompted by the bot to finish the set-up.```"""
             return
 
         if (command == 'create'):
+            params["name"] = contents[1]
             self.mode = 1
-            await message.channel.send("You will now be prompted with questions to select the specs for yo vm")
+            await message.channel.send("You will now be prompted with questions to select the specs for " + params["name"])
             await message.channel.send("Send ~cancel to cancel your subscription to NORD VPN")
             await message.channel.send("Remember to prefix your replies with ~")
             await message.channel.send("Please select one of the following providers:\n1. DigitalOcean\n2. AWS\n3. GoogleCloudPlatform")
