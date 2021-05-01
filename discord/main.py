@@ -10,35 +10,42 @@ params = {
     'region': ''
 }
 
-
 class MyClient(discord.Client):
     async def on_ready(self):
         print('Logged on as {0}!'.format(self.user))
 
     async def on_message(self, message):
-
-        if (message.author == self.user):
+        if (message.author == self.user or  not message.content.startswith("~")):
             return
 
-        # await message.channel.send('Message from {0.author}: {0.content}'.format(message))
+        contents = message.content.split(" ") # split the message by spaces
 
-        if (message.content.startswith("~token ")):
-            temp = message.content[7:]
-            params['token'] = temp
-            await message.channel.send('Your token is {0}'.format(temp))
+        # the first thing iz command
+        command = contents[0][1:] # discard the first character
+        # errthing else is args
+        arguments = " ".join(contents[1:]) # 2nd thing is args
 
-        if (message.content.startswith("~provider ")):
-            temp = message.content[10:]
-            if temp != "DigitalOcean" or temp != "Google Cloud" or temp != "Amazon Web Services":
-                await message.channel.send("Please choose DigitalOcean or Google Cloud or Amazon Web Services")
+        if (command == "token "):
+            params['token'] = arguments
+            await message.channel.send(f"Your token is {params['token']}")
+
+        if (command == "provider" ):
+            params['provider'] = arguments
+            temp = params['provider']
+            print(temp)
+
+            valid = ["digitalocean", "google cloud", "amazon web services"]
+
+            if (temp.lower() in valid):
+                await message.channel.send(f"Your provider is {temp}")
             else:
-                params['provider'] = temp
-                await message.channel.send('Your provider is {0}'.format(temp))
+                await message.channel.send(f"We do not support this provider yet")
+
 
         if (message.content.startswith("~region ")):
-            temp = message.content[8:]
+            temp = arguments
             params['region'] = temp
-            await message.channel.send('Your region is {0}'.format(temp))
+            await message.channel.send(f"Your region is {temp}")
 
 
 client = MyClient()
