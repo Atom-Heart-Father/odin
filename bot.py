@@ -9,8 +9,7 @@ import discord
 config = dotenv_values(".env")
 
 # SECRET_KEY = os.getenv("TOKEN")
-# SECRET_KEY = config["TOKEN"]
-SECRET_KEY = "ODM3ODg2NDUxNzM4NzM4NzU4.YIzEkQ.lNJyMaA3xSuXVJJEjJYio9ASccw"
+SECRET_KEY = config["TOKEN"]
 
 params = None
 countries = None
