@@ -46,6 +46,7 @@ class MyClient(discord.Client):
         for q in queries:
             if q in string:
                 return True
+        return False
 
     async def on_ready(self):
         print(f"Logged on as {self.user}!")
@@ -77,15 +78,15 @@ class MyClient(discord.Client):
 
     async def handle_region(self, message):
         success = False
-        if (await self.find(["us", "states", "unitedstates", "united states", "america"], message.content.lower())):
+        if (await self.find(["us", "states", "unitedstates", "united states", "america", "1"], message.content.lower())):
                 params["region"] = "USA"
                 success = True
 
-        elif (await self.find(["uk", "kingdom", "unitedkingdom", "united kingdom", "england", "britian"], message.content.lower())):
+        elif (await self.find(["uk", "kingdom", "unitedkingdom", "united kingdom", "england", "britian", "2"], message.content.lower())):
             params["region"] = "UK"
             success = True
 
-        elif (await self.find(["india", "in", "bharat"], message.content.lower())):
+        elif (await self.find(["india", "in", "bharat", "3"], message.content.lower())):
             params["region"] = "IN"
             success = True
 
@@ -97,11 +98,11 @@ class MyClient(discord.Client):
 
     async def handle_os(self, message):
         success = False
-        if (await self.find(["ubuntu"], message.content.lower())):
+        if (await self.find(["ubuntu", "2"], message.content.lower())):
                 params["OS"] = "Ubuntu 16.0"
                 success = True
 
-        elif (await self.find(["arch"], message.content.lower())):
+        elif (await self.find(["arch", "1"], message.content.lower())):
             params["OS"] = "Arch Linux"
             success = True
 
@@ -111,29 +112,71 @@ class MyClient(discord.Client):
             await message.channel.send("How many CPUs would you like to use?")
             return True
 
+        return False
+
     async def handle_cpu(self, message):
         success = False
-        # if (await self.find(["ubuntu"], message.content.lower())):
-        #         params["OS"] = "Ubuntu 16.0"
-        #         success = True
-
-        # elif (await self.find(["arch"], message.content.lower())):
-        #     params["OS"] = "Arch Linux"
-        #     success = True
 
         try:
             number = int(message.content.lower()[1:])
-            if 0 < number < 69:
+            if 0 < number <= 64 and  (number & (number-1) == 0):
                 params["CPUs"] = number
                 success = True
             else:
-                await message.channel.send("The number of CPUs should be between 1 and 69")
+                await message.channel.send("The number of CPUs should be between 1 and 64 and should be a power of 2")
+                return 69
         except:
             await message.channel.send("Couldn't parse the number of CPUs, are you sure you entered a number (eg: ~55)")
+            return 70
         if success:
             await message.channel.send(f"You have selected {params['CPUs']} CPU cores for your VM, seems like you have a lot of money")
             self.current_prompt = 4
-            await message.channel.send("How much RAM would you like?")
+            await message.channel.send("How much RAM would you like? (in GBs)")
+            return True
+
+        return False
+
+    async def handle_ram(self, message):
+        success = False
+
+        try:
+            number = int(message.content.lower()[1:])
+            if 0 < number <= 128:
+                params["RAM"] = number
+                success = True
+            else:
+                await message.channel.send("The storage should be between 10 and 128")
+                return 69
+        except:
+            await message.channel.send("Couldn't parse the amount of RAM, are you sure you entered a number (eg: ~55)")
+            return 70
+        if success:
+            await message.channel.send(f"You have selected {params['RAM']} GB(s) of RAM")
+            self.current_prompt = 5
+            await message.channel.send("How much storage would you like? (in GBs)")
+            return True
+
+        return False
+
+    async def handle_storage(self, message):
+        success = False
+
+        try:
+            number = int(message.content.lower()[1:])
+            if 9 < number <= 1000:
+                params["Storage"] = number
+                success = True
+            else:
+                await message.channel.send("The storage should be between 10 and 1000")
+                return 69
+        except:
+            await message.channel.send("Couldn't parse the amount of storage, are you sure you entered a number (eg: ~55)")
+            return 70
+        if success:
+            await message.channel.send(f"You have selected {params['Storage']} GBs of storage")
+            self.current_prompt = 6
+            await message.channel.send("Looks like things are done! Have a cup of coffee, your VM will be ready!")
+            self.mode = 0
             return True
 
         return False
@@ -167,6 +210,17 @@ class MyClient(discord.Client):
                 await self.send_error(message)
             return
 
+        elif self.current_prompt == 4:
+            if not await self.handle_ram(message):
+                await self.send_error(message)
+            return
+
+        elif self.current_prompt == 5:
+            if not await self.handle_storage(message):
+                await self.send_error(message)
+            return
+
+
     async def on_message(self, message):
         if (message.author == self.user or not message.content.startswith("~")):
             return
@@ -194,7 +248,6 @@ class MyClient(discord.Client):
             await message.channel.send("Remember to prefix your replies with ~")
             await message.channel.send("Please select one of the following providers:\n1. DigitalOcean\n2. AWS\n3. GoogleCloudPlatform")
             self.current_prompt = 0
-
 
 client = MyClient()
 client.run(SECRET_KEY)
