@@ -1,25 +1,25 @@
 
-# Odin
+# ODIN
+<p align="center">
+<img src="https://static.wikia.nocookie.net/lolesports_gamepedia_en/images/6/6b/ODIN_Gaminglogo_square.png/revision/latest?cb=20210126155523"/>
+</p>
 
-<img src="https://github.com/Atom-Heart-Father/odin/blob/main/assets/Odin.png"/>
 
 ## About
 
-This pandemic has forced a change in the usual environment one would work in. It is evident that there is major lack of resources and to compensate for the situation, many companies have been forced to issue laptops and other essentials to create a working environment for the employees at comfort of their home. Some companies do not have the resources to avail each and every employee, adequate tools to create an efficient workspace resulting in them losing their jobs.
-<br>
-<br>
-There persists a large strain on the IT department major companies, and also on the employees themselves to get accustomed to the new working environment, especially those in critical departments such as Management and operations, who need a machine to deploy these cloud resources from. We found a solution which helps solve this problem entirely. It deploys cloud infrastructure simply with the help of a chat on a mobile phone. We are using Discord as the chat platform.
-<br>
-<br>
-The deployment is generated using Terraform. It is a popular IaaC tool used commonly. It is quite efficient in preventing faulty deployments and gives an added advantage of integrating over 131 cloud providers, which includes providers with major market share, as well as several other smaller providers. Adding a provider is as simple as plug-and-play and this way it helps in aiding employees and companies to get an efficient workspace set in their homes.
+- This pandemic has forced a change in the usual environment one would work in. It is evident that there is a major lack of resources and to compensate for the situation, many companies have been forced to issue laptops and other essentials to create a working environment for the employees in the comfort of their home. Some companies do not have the resources to avail each and every employee, adequate tools to create an efficient workspace resulting in them losing their jobs.<br></br>
+- There persists a large strain on the IT department major companies, and also on the employees themselves to get accustomed to the new working environment, especially those in critical departments such as Management and operations, who need a machine to deploy these cloud resources from. We found a solution that helps solve this problem entirely. It deploys cloud infrastructure simply with the help of a chat on a mobile phone. We are using Discord as the chat platform.<br></br>
+- The deployment is generated using Terraform. It is quite a popular IaC tool, hence why we chose to work with it. It is quite efficient in preventing faulty deployments and gives an added advantage of integrating over 131 cloud providers, which includes providers with major market share, as well as several other smaller providers. Adding a provider is as simple as plug-and-play and this way it helps in aiding employees and companies to get an efficient workspace set in their homes.
 
 ## Features
 
-- Deploy Cloud Infrastructure, using a simple chat bot.  
+- Deploy Cloud Infrastructure, using a simple chatbot.  
 
 - Abstract away complex terms and user interface involved with deploying infrastructure.
 
-- Completely automated deployments using Terraform. Terraform supports more than a 100 cloud providers. At the moment this enables 1 major cloud provider namely, Digital Ocean. Other major provider configurations can be set up easily by adding their respective config files. 
+- Completely automated deployments using Terraform. Terraform supports more than 100 cloud providers. At the moment this enables 2 major cloud providers namely, DigitalOcean and AWS. Other major provider configurations can be set up easily by adding their respective config files. 
+      
+
       
 ## Operational Procedure
 
