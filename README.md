@@ -8,10 +8,10 @@
 This pandemic has forced a change in the usual environment one would work in. It is evident that there is major lack of resources and to compensate for the situation, many companies have been forced to issue laptops and other essentials to create a working environment for the employees at comfort of their home. Some companies do not have the resources to avail each and every employee, adequate tools to create an efficient workspace resulting in them losing their jobs.
 <br>
 <br>
-Even for major companies, there is a large strain on the IT department of companies, and also on the employees themselves to get accustomed to the new working environment, especially those in critical departments such as Operations, who need a machine to deploy these cloud resources from. We found a solution which helps solve this problem entirely. It deploys cloud infrastructure simply with the help of a chat on a mobile phone. We are using Disocrd as the chat platform.
+There persists a large strain on the IT department major companies, and also on the employees themselves to get accustomed to the new working environment, especially those in critical departments such as Management and operations, who need a machine to deploy these cloud resources from. We found a solution which helps solve this problem entirely. It deploys cloud infrastructure simply with the help of a chat on a mobile phone. We are using Discord as the chat platform.
 <br>
 <br>
-The bot uses DialogFlow and processes natural language which makes it very simple for people to communicate with the bot. It proves to be secure, as the bot requires the user to give necessary details for it to work. The deployment is generated using Terraform. It is a popular IaaC tool used commonly. It is quite efficient in preventing faulty deployments and gives an added advantage of integrating over 131 cloud providers, which includes providers with major market share, as well as several other smaller providers. Adding a provider is as simple as plug-and-play and this way it helps in aiding employees and companies to get an efficient workspace set in their homes.
+The deployment is generated using Terraform. It is a popular IaaC tool used commonly. It is quite efficient in preventing faulty deployments and gives an added advantage of integrating over 131 cloud providers, which includes providers with major market share, as well as several other smaller providers. Adding a provider is as simple as plug-and-play and this way it helps in aiding employees and companies to get an efficient workspace set in their homes.
 
 ## About
 
@@ -31,12 +31,45 @@ The deployment is generated using Terraform. It is a popular IaaC tool used comm
 
 ## Features
 
-- Deploy Cloud Infrastructure on the fly, using a simple chat interface. Sessions are isolated and stored securely in the Zulip (maybe Slack) bot storage. 
+- Deploy Cloud Infrastructure, using a simple chat bot.  
 
-- Natural Language Processing: Understands natural human language.
+- Abstract away complex terms and user interface involved with deploying infrastructure.
 
-- Abstract away complex terms involved with deploying infra, asks simple questions about the configuration.
+- Completely automated deployments using Terraform. Terraform supports more than a 100 cloud providers. At the moment this enables 1 major cloud provider namely, Digital Ocean. Other major provider configurations can be set up easily by adding their respective config files. 
+      
+## Operational Procedure
 
-- Completely automated deployments using Terraform. Rolls back all changes if errors occured. Verbose and crystal-clear error messages.
+1. Clone the repo
+   ```sh
+   git clone https://github.com/Atom-Heart-Father/odin.git
+   ```
+2. Install `virtualenv`
+   ```sh
+   pip install virtualenv
+   ```
+3. Create a virtual environment
+   ```sh
+   python -m venv env
+   ```
+   ```sh
+   env\Scripts\activate
+   ```
+4. Install all requirements
+   ```sh
+   pip install -r requirements.txt
+   ```
+   
+## How to Contribute
 
-- Supports over 100 cloud providers! Just add a terraform config and you're good to go. Sample configs for a few major providers will be available.
+Contributions are what make the open source community such an amazing place to be learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'feat: AmazingFeature'`)
+   - Please refer to the commit guidelines mentioned [here](https://www.conventionalcommits.org/en/v1.0.0/).
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request.
+   
+## Contributors
+
+
