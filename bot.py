@@ -1,5 +1,6 @@
+from logging import error
 from dotenv import dotenv_values
-from main import father
+# from main import father
 
 config = dotenv_values(".env")
 
@@ -15,23 +16,34 @@ countries = None
 with open("./../../params.json", "r") as read_file:
     params = json.load(read_file)
 
-with open("./../../countries.json", "r") as read_file:
-    countries = json.load(read_file)["countries"]
-
-
 async def make_child():
     details = {
         "os": params["OS"],
         "name": params["name"],
-        "memory": params["RAM"],
         "region": params["region"],
-        "processor": params["CPUs"],
     }
 
-    if await father(details):
-        return True
-    else:
-        return False
+    if params["Package"] == 1:
+        details["memory"] = "1"
+        details["processor"] = "1"
+    elif params["Package"] == 2:
+        details["memory"] = "2"
+        details["processor"] = "1"
+    elif params["Package"] == 3:
+        details["memory"] = "2"
+        details["processor"] = "2"
+    elif params["Package"] == 4:
+        details["memory"] = "4"
+        details["processor"] = "2"
+    elif params["Package"] == 5:
+        details["memory"] = "8"
+        details["processor"] = "4"
+
+    # if await father(details):
+    #     return True
+    # else:
+    #     return False
+    print(details)
 
 
 
@@ -47,20 +59,18 @@ Follow the instructions prompted by the bot to finish the set-up.```"""
     # in create mode, the bot starts interrogating you
     mode = 0
 
-    create_commands = [
-        "provider",
-        "region",
-        "os",
-        "cpu",
-        "ram",
-        "storage",
-        "token"
-    ]
-
     regions_string = "\n1. USA\n2. UK\n3. IN"
     current_prompt = -1
 
     OS_string = "\n1. Fedora\n2. Ubuntu 16"
+
+    packages_list = [
+        "1. 1 CPU, 1 GB RAM, 25 GB SSD",
+        "2. 1 CPU, 2GB RAM, 50GB SSD",
+        "3. 2 CPU, 2GB RAM, 60GB SSD",
+        "4. 2 CPU, 4GB RAM, 80GB SSD",
+        "5. 4 CPU, 8GB RAM, 160GB SSD"
+    ]
 
     async def find(self, queries, string):
         for q in queries:
@@ -101,17 +111,14 @@ Follow the instructions prompted by the bot to finish the set-up.```"""
         if (await self.find(["us", "states", "unitedstates", "united states", "america", "1"], message.content.lower())):
             params["region"] = "nyc3"
             success = True
-            await message.channel.send("Thing will be made at NYC-3")
 
         elif (await self.find(["uk", "kingdom", "unitedkingdom", "united kingdom", "england", "britian", "2"], message.content.lower())):
             params["region"] = "lon1"
             success = True
-            await message.channel.send("Thing will be made at LON-1")
 
         elif (await self.find(["india", "in", "bharat", "3"], message.content.lower())):
             params["region"] = "blr1"
             success = True
-            await message.channel.send("Thing will be made at BLR-1")
 
         if success:
             await message.channel.send(f"You have selected {params['region']} as your region")
@@ -132,79 +139,36 @@ Follow the instructions prompted by the bot to finish the set-up.```"""
         if success:
             await message.channel.send(f"You have selected {params['OS']} as your operating system")
             self.current_prompt = 3
-            await message.channel.send("How many CPUs would you like to use?")
+            await message.channel.send("What package would you like to use?\n" + "\n".join(self.packages_list))
             return True
 
         return False
 
-    async def handle_cpu(self, message):
+
+    async def handle_package(self, message):
         success = False
 
         try:
             number = int(message.content.lower()[1:])
-            if 0 < number <= 64 and  (number & (number-1) == 0):
-                params["CPUs"] = number
+            if 0 < number <= 5:
                 success = True
             else:
-                await message.channel.send("The number of CPUs should be between 1 and 64 and should be a power of 2")
+                await message.channel.send("Invalid package selected")
                 return 69
         except:
-            await message.channel.send("Couldn't parse the number of CPUs, are you sure you entered a number (eg: ~55)")
+            await message.channel.send("Couldn't parse the package number, are you sure you entered a number (eg: ~55)")
             return 70
         if success:
-            await message.channel.send(f"You have selected {params['CPUs']} CPU cores for your VM, seems like you have a lot of money")
+            params["Package"] = number
+            await message.channel.send(f"You have selected package {self.packages_list[number-1]}, seems like you have a lot of money")
             self.current_prompt = 4
-            await message.channel.send("How much RAM would you like? (in GBs)")
-            return True
-
-        return False
-
-    async def handle_ram(self, message):
-        success = False
-
-        try:
-            number = int(message.content.lower()[1:])
-            if 0 < number <= 128:
-                params["RAM"] = number
-                success = True
-            else:
-                await message.channel.send("The storage should be between 10 and 128")
-                return 69
-        except:
-            await message.channel.send("Couldn't parse the amount of RAM, are you sure you entered a number (eg: ~55)")
-            return 70
-        if success:
-            await message.channel.send(f"You have selected {params['RAM']} GB(s) of RAM")
-            self.current_prompt = 5
-            await message.channel.send("How much storage would you like? (in GBs)")
-            return True
-
-        return False
-
-    async def handle_storage(self, message):
-        success = False
-
-        try:
-            number = int(message.content.lower()[1:])
-            if 9 < number <= 1000:
-                params["Storage"] = number
-                success = True
-            else:
-                await message.channel.send("The storage should be between 10 and 1000")
-                return 69
-        except:
-            await message.channel.send("Couldn't parse the amount of storage, are you sure you entered a number (eg: ~55)")
-            return 70
-        if success:
-            await message.channel.send(f"You have selected {params['Storage']} GBs of storage")
-            self.current_prompt = 6
             await message.channel.send(f"Looks like things are done! Have a cup of coffee, your VM, {params['name']},  will be ready in about a minute!")
             self.mode = 0
             if await make_child():
                 return True
             else:
                 await message.channel.send("Sorry an error occured")
-                return False
+                return 60
 
         return False
 
@@ -214,7 +178,7 @@ Follow the instructions prompted by the bot to finish the set-up.```"""
             self.mode = 0
             return
 
-        if message.content == "~create":
+        if message.content.startswith("~create "):
             await message.channel.send("You are already in create mode")
             return
 
@@ -233,20 +197,9 @@ Follow the instructions prompted by the bot to finish the set-up.```"""
                 await self.send_error(message)
             return
         elif self.current_prompt == 3:
-            if not await self.handle_cpu(message):
+            if not await self.handle_package(message):
                 await self.send_error(message)
             return
-
-        elif self.current_prompt == 4:
-            if not await self.handle_ram(message):
-                await self.send_error(message)
-            return
-
-        elif self.current_prompt == 5:
-            if not await self.handle_storage(message):
-                await self.send_error(message)
-            return
-
 
     async def on_message(self, message):
         if (message.author == self.user or not message.content.startswith("~")):
@@ -260,8 +213,8 @@ Follow the instructions prompted by the bot to finish the set-up.```"""
             await self.create_mode(message)
             return
 
-        if (command in self.create_commands):
-            await message.channel.send("You need to switch to create mode. Try typing in ~create")
+        if (command == 'cancel'):
+            await message.channel.send("Too late!")
             return
 
         if (command != 'create'):
@@ -269,12 +222,18 @@ Follow the instructions prompted by the bot to finish the set-up.```"""
             return
 
         if (command == 'create'):
-            params["name"] = contents[1]
+            try:
+                params["name"] = contents[1]
+            except:
+                params["name"] = "myVM"
+
             self.mode = 1
-            await message.channel.send("You will now be prompted with questions to select the specs for " + params["name"])
-            await message.channel.send("Send ~cancel to cancel your subscription to NORD VPN")
-            await message.channel.send("Remember to prefix your replies with ~")
-            await message.channel.send("Please select one of the following providers:\n1. DigitalOcean\n2. AWS\n3. GoogleCloudPlatform")
+            first_message = f"""You will now be prompted with questions to select the specs for {params['name']}
+Send ~cancel to stop anytime and discard the changes
+Remember to prefix your replies with ~
+Please select one of the following providers:\n1. DigitalOcean\n2. AWS\n3. GoogleCloudPlatform"""
+
+            await message.channel.send(first_message)
             self.current_prompt = 0
 
 client = MyClient()
